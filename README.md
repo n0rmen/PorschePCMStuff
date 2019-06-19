@@ -20,16 +20,27 @@ Bytes 0 - 3 = Header Bytes
 Bytes 4 - 9 = Magic 11 07 FF FF FF FF
 
 Bytes 10 - 13 = Hex filesize, for example BB 00 00 00 = BB, or 187 bytes (size from offset 0x8 to end of signature block)
+
 Bytes 14 = Version, ex 03(?)
 
 Bytes 15 - 19 = Vehicle Component Reference Number -> 14 Bytes Located at offset 0x4E0 of RCC EEPROM, convert hex to ASCII and remove spacing = 5 VCRN bytes. This can be calculated but I am not what data this is based on. See patent US9479329.
+
 Bytes 20 - 36 = VIN
+
 Byte  37 = 00 (padding)
+
 Bytes 38 - 42 = Epoch in hex (Timestamp)
+
 Byte  43 = FEC Count
+
 Bytes 44 - 47, 48 - 51, etc... = FECs (4-digit hex ID)... we will assume 1 FEC ending at 40 for this example
+
 Bytes 48 - 175 = RSA signed RMD160 checksum of data from offset 0x8 to end of big endian FEC block (byte 40 for this example)
+
 Byte  176 = FEC count (again)
+
 Bytes 177-179 = 00 00 00 (padding)
+
 Bytes 180-183, 184-187, etc... = FEC #x in little endian
+
 Bytes 188-199 = 01 00 00 00 03 00 00 00 FF 00 00 00 (file magic?)
