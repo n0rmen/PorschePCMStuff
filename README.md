@@ -14,7 +14,8 @@ This script offers one-touch operation for generating FECs for your MIB2 (PCM4, 
 
 You will then need to upload the new FecContainer.fec file to your MIB2 efs-persist directory and replace the public keys located in the directory. Place the files onto an SD card, insert it into MIB2, then use the RCC serial port to copy from /net/mmx/fs/sda0/{your filenames} to /mnt/efs-persist/FEC/FecContainer.fec and /mnt/efs-persist/Keys/*
 
-This is the structure of a FecContainer.fec file
+# This is the structure of a FecContainer.fec file
+
 Bytes 0 - 3 = Header Bytes
 
 Bytes 4 - 9 = Magic 11 07 FF FF FF FF
