@@ -24,7 +24,7 @@ Bytes 10 - 13 = Hex filesize, for example BB 00 00 00 = BB, or 187 bytes (size f
 
 Bytes 14 = Version, ex 03(?)
 
-Bytes 15 - 19 = Vehicle Component Reference Number -> 14 Bytes Located at offset 0x4E0 of RCC EEPROM, convert hex to ASCII and remove spacing = 5 VCRN bytes. This can be calculated but I am not what data this is based on. See patent US9479329.
+Bytes 15 - 19 = Vehicle Component Reference Number -> 5 bytes, not sure what this is calculated from but you can pull it from your existing fec file. See patent US9479329.
 
 Bytes 20 - 36 = VIN
 
