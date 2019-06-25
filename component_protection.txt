@@ -75,3 +75,7 @@ Erase CP Region from QNX Shell on RCC modifyE2P only writes 16 bytes at once.
 /usr/apps/modifyE2P w 0x2e0 FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF
 
 Values are 40 bytes encryped data, so RMD320? There is a checksum stored elsewhere in E2P that must be changed or a fault code is thrown.
+
+IKA and GFA keys are needed for CP. Appear to be stored in CAN Gateway (Address 19)
+IDE12084-MAS14064,Status of component protection slaves-Status of the IKA key for component protection participants,IKA key stored, 
+IDE07145-MAS06785,Component protection properties-GFA key,used, 
