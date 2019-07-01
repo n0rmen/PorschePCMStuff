@@ -51,7 +51,9 @@ MKXFS is used to re-build the root filesystem after unpacking and modification. 
 
 The IFS image can then be loaded onto an SD card and flashed back onto your MIB2 with the following commands:
 flashunlock
+
 /usr/bin/flashit	-v -x -d -a{HEX_OFFSET} -f/net/mmx/fs/sda0/patchedroot.ifs
+
 flashlock
 
 The attributes file does not contain enough information to create a bootable ifs image. Thus, you should only use it to patch the stage 2 non-bootable ifs that is embedded within ifs-root.ifs file. This second stage image contains critical applications like MIBRoot, but not applications required to bring up QNX shell, meaning disaster recovery is easy (compared to screwing up the entire root fs).
