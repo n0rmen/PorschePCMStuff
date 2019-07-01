@@ -47,7 +47,7 @@ Bytes 180-183, 184-187, etc... = FEC #x in little endian
 Bytes 188-199 = 01 00 00 00 03 00 00 00 FF 00 00 00 (file magic?)
 
 # MKXFS Utility (Rebuild ifs-root)
-MKXFS is used to re-build the root filesystem after unpacking and modification. The included attributes file (mkifs-attributes.txt) can be used with MKXFS to create a working ifs image. 
+MKXFS is used to re-build the root filesystem after unpacking and modification. The included attributes file (mkifs-attributes.txt) can be used with MKXFS to create a working ifs image. MKXFS is part of the QNX SDP or OpenQNX, but a pre-compiled binary is provided here for convenience.
 
 The IFS image can then be loaded onto an SD card and flashed back onto your MIB2 with the following commands:
 flashunlock
