@@ -2,14 +2,8 @@
 # MIB2_FEC_Generator.sh -f desired_fecs_comma_separated -n YOUR_VCRN -v YOUR_VIN -d output_dir (default ./)
 
 # This script offers one-touch operation for generating FECs for your MIB2 (PCM4, VW Discover Pro, Bentley, Audi, Skoda, etc...) head unit.
-# It will generate a private RSA key, sign the public keys, and generate a
-# signed FEC container based on the given command line options.
-# You will then need to upload the new FecContainer.fec file to your MIB2 efs-persist
-# directory and replace the public keys located in the directory.
 # Place the files onto an SD card, insert it into MIB2, then use the RCC serial port to copy
-# from /net/mmx/fs/sda0/{your filenames} to /mnt/efs-persist/FEC/FecContainer.fec and /mnt/efs-persist/Keys/*
-
-#!!! REPLACING YOUR MIB2 PUBLIC KEYS WILL BREAK THE ABILITY TO RECEIVE UPDATES !!!
+# from /net/mmx/fs/sda0/{your filenames} to /mnt/efs-persist/FEC/FecContainer.fec 
 
 #Known FECs
 #00030000                  # AMI (Enables USB)
@@ -103,7 +97,7 @@ create_keypair_and_sign () {
     cp $datakeydir/MIB-High_DK_public_signed.bin $datakeydir/PO_MIB-High_DK_public_signed.bin
 
     #create instructions in the key directory
-    echo 'These are your signing keys. Only MIB-High_*_public_signed.bin need to be transferred to your MIB2 (/mnt/efs-persist/*/ or /mnt/efs-persist/Keys/*/). Retain the private keys in case you need to sign an update file in the future.' > $output_dir_keys/readme.txt
+    echo 'Do not replace your public keys, MIB will not accept them. Changes are required to MIBRoot to use your new FEC container.' > $output_dir_keys/readme.txt
 
     #verify
     if [ -f "$metainfokeydir/MIB-High_MI_public_signed.bin" ] && [ -f "$feckeydir/MIB-High_FEC_public_signed.bin" ] && [ -f "$datakeydir/MIB-High_DK_public_signed.bin" ]; then
