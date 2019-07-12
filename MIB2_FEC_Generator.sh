@@ -4,6 +4,7 @@
 # This script offers one-touch operation for generating FECs for your MIB2 (PCM4, VW Discover Pro, Bentley, Audi, Skoda, etc...) head unit.
 # Place the files onto an SD card, insert it into MIB2, then use the RCC serial port to copy
 # from /net/mmx/fs/sda0/{your filenames} to /mnt/efs-persist/FEC/FecContainer.fec 
+# Because we do not have the original private key file, you will need to then patch your MIBRoot application to accept our new FEC file, since the signature will not match what MIBRoot expects.
 
 #Known FECs
 #00030000                  # AMI (Enables USB)
@@ -77,31 +78,9 @@ create_keypair_and_sign () {
     $(openssl dgst -sha1 -binary -sign "$output_dir_keys"/MIB-High_MI_private.pem "$output_dir_keys"/padded_feckey.tmp >> "$output_dir_keys"/padded_feckey.tmp)
     $(openssl dgst -sha1 -binary -sign "$output_dir_keys"/MIB-High_MI_private.pem "$output_dir_keys"/padded_mikey.tmp >> "$output_dir_keys"/padded_mikey.tmp)
 
-    #create signed MI key files
-    mv "$output_dir_keys"/padded_mikey.tmp $metainfokeydir/MIB-High_MI_public_signed.bin
-    cp $metainfokeydir/MIB-High_MI_public_signed.bin $metainfokeydir/AU_MIB-High_MI_public_signed.bin
-    cp $metainfokeydir/MIB-High_MI_public_signed.bin $metainfokeydir/SK_MIB-High_MI_public_signed.bin
-    cp $metainfokeydir/MIB-High_MI_public_signed.bin $metainfokeydir/VW_MIB-High_MI_public_signed.bin
-    cp $metainfokeydir/MIB-High_MI_public_signed.bin $metainfokeydir/PO_MIB-High_MI_public_signed.bin
-    #create signed FEC key files
-    mv "$output_dir_keys"/padded_feckey.tmp $feckeydir/MIB-High_FEC_public_signed.bin
-    cp $feckeydir/MIB-High_FEC_public_signed.bin $feckeydir/AU_MIB-High_FEC_public_signed.bin
-    cp $feckeydir/MIB-High_FEC_public_signed.bin $feckeydir/SK_MIB-High_FEC_public_signed.bin
-    cp $feckeydir/MIB-High_FEC_public_signed.bin $feckeydir/VW_MIB-High_FEC_public_signed.bin
-    cp $feckeydir/MIB-High_FEC_public_signed.bin $feckeydir/PO_MIB-High_FEC_public_signed.bin
-    #copy metainfo key to datakey location
-    cp $metainfokeydir/MIB-High_MI_public_signed.bin $datakeydir/MIB-High_DK_public_signed.bin
-    cp $datakeydir/MIB-High_DK_public_signed.bin $datakeydir/AU_MIB-High_DK_public_signed.bin
-    cp $datakeydir/MIB-High_DK_public_signed.bin $datakeydir/VW_MIB-High_DK_public_signed.bin
-    cp $datakeydir/MIB-High_DK_public_signed.bin $datakeydir/SK_MIB-High_DK_public_signed.bin
-    cp $datakeydir/MIB-High_DK_public_signed.bin $datakeydir/PO_MIB-High_DK_public_signed.bin
-
-    #create instructions in the key directory
-    echo 'Do not replace your public keys, MIB will not accept them. Changes are required to MIBRoot to use your new FEC container.' > $output_dir_keys/readme.txt
-
     #verify
     if [ -f "$metainfokeydir/MIB-High_MI_public_signed.bin" ] && [ -f "$feckeydir/MIB-High_FEC_public_signed.bin" ] && [ -f "$datakeydir/MIB-High_DK_public_signed.bin" ]; then
-        echo "Successful key generation. Keys are located in $output_dir_keys.";
+        echo "Successful temp key generation.";
         return 0;
     else
         echo 'Failed to generate signed public key files. Check output above for errors.';
@@ -236,16 +215,15 @@ EPOCH=$(date +%s)
 echo "Using epoch: $EPOCH.";
 
 echo "================================================================================================";
-echo "Now generating signing keys...";
+echo "Now generating temporary keys to sign container...";
 create_keypair_and_sign;
 echo "================================================================================================";
 echo "Now building FEC container.";
 build_fec_container;
 echo "================================================================================================";
-echo "Success! Your FEC files are located in $output_dir.";
-echo "Remember to also copy your public keys to the appropriate location in efs-persist.";
+echo "Success! Your FEC container is located in $output_dir/feccontainer.fec. Copy it to /mnt/efs-persist/FEC. MIBRoot patch is required.";
 echo "================================================================================================";
-
+rm -rf $output_dir_keys
 rm -rf vcrn.tmp && rm -rf $output_dir/fecwap.tmp && rm -rf $output_dir/fecwapped.tmp && rm -rf $output_dir/FecContainer.tmp
 
 exit 1;
