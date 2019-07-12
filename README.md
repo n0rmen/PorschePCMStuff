@@ -12,7 +12,9 @@ Usage example: dumpefs -t ./efs-persist.efs > output.txt && python extract_efs.p
 # MIB2_FEC_Generator.sh
 This script offers one-touch operation for generating FECs for your MIB2 (PCM4, VW Discover Pro, Bentley, Audi, Skoda, etc...) head unit. It will generate a private RSA key, sign the public keys, and generate a signed FEC container based on the given command line options.
 
-You will then need to upload the new FecContainer.fec file to your MIB2 efs-persist directory and replace the public keys located in the directory. Place the files onto an SD card, insert it into MIB2, then use the RCC serial port to copy from /net/mmx/fs/sda0/{your filenames} to /mnt/efs-persist/FEC/FecContainer.fec and /mnt/efs-persist/Keys/*
+You will then need to upload the new FecContainer.fec file to your MIB2 efs-persist directory. Place the files onto an SD card, insert it into MIB2, then use the RCC serial port to copy from /net/mmx/fs/sda0/{your filenames} to /mnt/efs-persist/FEC/FecContainer.fec
+
+After uploading your new FEC file, you need to patch MIBRoot to ignore the file signature, otherwise it will not work.
 
 # This is the structure of a FecContainer.fec file
 
