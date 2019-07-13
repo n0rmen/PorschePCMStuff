@@ -103,7 +103,9 @@ build_fec_container () {
     local FECSHEX=${FECSHEX::${#FECSHEX}-2}
     local LEFECSHEX="\x"$(printf "$LEFECS" |  sed 's/.\{2\}/&\\x/g')
     local LEFECSHEX=${LEFECSHEX::${#LEFECSHEX}-2}
-    echo -n -e "$FILESIZE$MAGIC$VER" > $output_dir/FecContainer.tmp  && cat vcrn.tmp >> $output_dir/FecContainer.tmp && echo -n -e "$VINHEX$EPOCH_HEX$FECCOUNTN$FECSHEX" >> $output_dir/FecContainer.tmp
+    #echo -n -e "$FILESIZE$MAGIC$VER" > $output_dir/FecContainer.tmp  && cat vcrn.tmp >> $output_dir/FecContainer.tmp && echo -n -e "$VINHEX$EPOCH_HEX$FECCOUNTN$FECSHEX" >> $output_dir/FecContainer.tmp
+	echo -n -e "$MAGIC$VER" > $output_dir/FecContainer.tmp  && cat vcrn.tmp >> $output_dir/FecContainer.tmp && echo -n -e "$VINHEX$EPOCH_HEX$FECCOUNTN$FECSHEX" >> $output_dir/FecContainer.tmp
+
     echo "Now signing incomplete FEC container."
     $(openssl dgst -ripemd160 -binary -sign "$output_dir_keys"/MIB-High_FEC_private.pem $output_dir/FecContainer.tmp >> $output_dir/FecContainer.tmp)
 
@@ -116,7 +118,7 @@ build_fec_container () {
     fi
 
     echo -n -e "$FECCOUNTN\x00\x00\x00"$LEFECSHEX"\x01\x00\x00\x00\x03\x00\x00\x00\xFF\x00\x00\x00">> $output_dir/FecContainer.tmp
-    echo -n -e '\x01\x00\x00\x00' > $output_dir/FecContainer.fec & cat $output_dir/FecContainer.tmp >> $output_dir/FecContainer.fec
+    echo -n -e '\x01\x00\x00\x00'$FILESIZE > $output_dir/FecContainer.fec & cat $output_dir/FecContainer.tmp >> $output_dir/FecContainer.fec
 
     #verify
     if [ -f "$output_dir/FecContainer.tmp" ]; then
