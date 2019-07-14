@@ -78,12 +78,36 @@ create_keypair_and_sign () {
     $(openssl dgst -sha1 -binary -sign "$output_dir_keys"/MIB-High_MI_private.pem "$output_dir_keys"/padded_feckey.tmp >> "$output_dir_keys"/padded_feckey.tmp)
     $(openssl dgst -sha1 -binary -sign "$output_dir_keys"/MIB-High_MI_private.pem "$output_dir_keys"/padded_mikey.tmp >> "$output_dir_keys"/padded_mikey.tmp)
 
+    #create signed MI key files
+    mv "$output_dir_keys"/padded_mikey.tmp $metainfokeydir/MIB-High_MI_public_signed.bin
+    cp $metainfokeydir/MIB-High_MI_public_signed.bin $metainfokeydir/AU_MIB-High_MI_public_signed.bin
+    cp $metainfokeydir/MIB-High_MI_public_signed.bin $metainfokeydir/SK_MIB-High_MI_public_signed.bin
+    cp $metainfokeydir/MIB-High_MI_public_signed.bin $metainfokeydir/VW_MIB-High_MI_public_signed.bin
+    cp $metainfokeydir/MIB-High_MI_public_signed.bin $metainfokeydir/PO_MIB-High_MI_public_signed.bin
+    #create signed FEC key files
+    mv "$output_dir_keys"/padded_feckey.tmp $feckeydir/MIB-High_FEC_public_signed.bin
+    cp $feckeydir/MIB-High_FEC_public_signed.bin $feckeydir/AU_MIB-High_FEC_public_signed.bin
+    cp $feckeydir/MIB-High_FEC_public_signed.bin $feckeydir/SK_MIB-High_FEC_public_signed.bin
+    cp $feckeydir/MIB-High_FEC_public_signed.bin $feckeydir/VW_MIB-High_FEC_public_signed.bin
+    cp $feckeydir/MIB-High_FEC_public_signed.bin $feckeydir/PO_MIB-High_FEC_public_signed.bin
+    #copy metainfo key to datakey location
+    cp $metainfokeydir/MIB-High_MI_public_signed.bin $datakeydir/MIB-High_DK_public_signed.bin
+    cp $datakeydir/MIB-High_DK_public_signed.bin $datakeydir/AU_MIB-High_DK_public_signed.bin
+    cp $datakeydir/MIB-High_DK_public_signed.bin $datakeydir/VW_MIB-High_DK_public_signed.bin
+    cp $datakeydir/MIB-High_DK_public_signed.bin $datakeydir/SK_MIB-High_DK_public_signed.bin
+    cp $datakeydir/MIB-High_DK_public_signed.bin $datakeydir/PO_MIB-High_DK_public_signed.bin
+
+
     #verify
     if [ -f "$metainfokeydir/MIB-High_MI_public_signed.bin" ] && [ -f "$feckeydir/MIB-High_FEC_public_signed.bin" ] && [ -f "$datakeydir/MIB-High_DK_public_signed.bin" ]; then
         echo "Successful temp key generation.";
         return 0;
     else
         echo 'Failed to generate signed public key files. Check output above for errors.';
+		echo "Need files exist:"
+		echo "$metainfokeydir/MIB-High_MI_public_signed.bin"
+		echo "$feckeydir/MIB-High_FEC_public_signed.bin"
+		echo "$datakeydir/MIB-High_DK_public_signed.bin"
         exit 1;
     fi
 }
@@ -103,7 +127,9 @@ build_fec_container () {
     local FECSHEX=${FECSHEX::${#FECSHEX}-2}
     local LEFECSHEX="\x"$(printf "$LEFECS" |  sed 's/.\{2\}/&\\x/g')
     local LEFECSHEX=${LEFECSHEX::${#LEFECSHEX}-2}
-    echo -n -e "$FILESIZE$MAGIC$VER" > $output_dir/FecContainer.tmp  && cat vcrn.tmp >> $output_dir/FecContainer.tmp && echo -n -e "$VINHEX$EPOCH_HEX$FECCOUNTN$FECSHEX" >> $output_dir/FecContainer.tmp
+    #echo -n -e "$FILESIZE$MAGIC$VER" > $output_dir/FecContainer.tmp  && cat vcrn.tmp >> $output_dir/FecContainer.tmp && echo -n -e "$VINHEX$EPOCH_HEX$FECCOUNTN$FECSHEX" >> $output_dir/FecContainer.tmp
+	echo -n -e "$MAGIC$VER" > $output_dir/FecContainer.tmp  && cat vcrn.tmp >> $output_dir/FecContainer.tmp && echo -n -e "$VINHEX$EPOCH_HEX$FECCOUNTN$FECSHEX" >> $output_dir/FecContainer.tmp
+
     echo "Now signing incomplete FEC container."
     $(openssl dgst -ripemd160 -binary -sign "$output_dir_keys"/MIB-High_FEC_private.pem $output_dir/FecContainer.tmp >> $output_dir/FecContainer.tmp)
 
@@ -116,7 +142,7 @@ build_fec_container () {
     fi
 
     echo -n -e "$FECCOUNTN\x00\x00\x00"$LEFECSHEX"\x01\x00\x00\x00\x03\x00\x00\x00\xFF\x00\x00\x00">> $output_dir/FecContainer.tmp
-    echo -n -e '\x01\x00\x00\x00' > $output_dir/FecContainer.fec & cat $output_dir/FecContainer.tmp >> $output_dir/FecContainer.fec
+    echo -n -e '\x01\x00\x00\x00'$FILESIZE > $output_dir/FecContainer.fec & cat $output_dir/FecContainer.tmp >> $output_dir/FecContainer.fec
 
     #verify
     if [ -f "$output_dir/FecContainer.tmp" ]; then
@@ -142,7 +168,8 @@ while getopts ":f:n:v:d:"  opt; do
                         echo 'One or more of your FECs is an invalid length. FECs must be 8 digits.';
                         exit 1;
                     fi
-                    LEFECS=$LEFECS$(printf $i | grep -o .. | tail -r | echo "$(tr -d '\n')")
+                    #LEFECS=$LEFECS$(printf $i | grep -o .. | tail -r | echo "$(tr -d '\n')")
+					LEFECS=$LEFECS$(printf $i | echo "$(tr -d '\n')" | cut -c7-8)$(printf $i | echo "$(tr -d '\n')" | cut -c5-6)$(printf $i | echo "$(tr -d '\n')" | cut -c3-4)$(printf $i | echo "$(tr -d '\n')" | cut -c1-2)
                     FEC_COUNT=$((FEC_COUNT+1));
                 done
                 echo "Generating feature codes: $FECS_CSV. FEC count: $FEC_COUNT";
@@ -214,16 +241,23 @@ EPOCH=$(date +%s)
 
 echo "Using epoch: $EPOCH.";
 
+if [ ! -e $output_dir_keys/MIB-High_FEC_private.pem ]
+then
 echo "================================================================================================";
-echo "Now generating temporary keys to sign container...";
+echo "Now generating signing keys...";
 create_keypair_and_sign;
+else
+echo "Key already exist. Ignore";
+fi
+
 echo "================================================================================================";
 echo "Now building FEC container.";
 build_fec_container;
+
 echo "================================================================================================";
-echo "Success! Your FEC container is located in $output_dir/feccontainer.fec. Copy it to /mnt/efs-persist/FEC. MIBRoot patch is required.";
+echo "Success! Your FEC files are located in $output_dir.";
+echo "Remember to also copy your public keys to the appropriate location in efs-persist.";
 echo "================================================================================================";
-rm -rf $output_dir_keys
 rm -rf vcrn.tmp && rm -rf $output_dir/fecwap.tmp && rm -rf $output_dir/fecwapped.tmp && rm -rf $output_dir/FecContainer.tmp
 
 exit 1;
