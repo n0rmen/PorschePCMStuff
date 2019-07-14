@@ -128,7 +128,7 @@ build_fec_container () {
     local LEFECSHEX="\x"$(printf "$LEFECS" |  sed 's/.\{2\}/&\\x/g')
     local LEFECSHEX=${LEFECSHEX::${#LEFECSHEX}-2}
     #echo -n -e "$FILESIZE$MAGIC$VER" > $output_dir/FecContainer.tmp  && cat vcrn.tmp >> $output_dir/FecContainer.tmp && echo -n -e "$VINHEX$EPOCH_HEX$FECCOUNTN$FECSHEX" >> $output_dir/FecContainer.tmp
-	echo -n -e "$MAGIC$VER" > $output_dir/FecContainer.tmp  && cat vcrn.tmp >> $output_dir/FecContainer.tmp && echo -n -e "$VINHEX$EPOCH_HEX$FECCOUNTN$FECSHEX" >> $output_dir/FecContainer.tmp
+    echo -n -e "$MAGIC$VER" > $output_dir/FecContainer.tmp  && cat vcrn.tmp >> $output_dir/FecContainer.tmp && echo -n -e "$VINHEX$EPOCH_HEX$FECCOUNTN$FECSHEX" >> $output_dir/FecContainer.tmp
 
     echo "Now signing incomplete FEC container."
     $(openssl dgst -ripemd160 -binary -sign "$output_dir_keys"/MIB-High_FEC_private.pem $output_dir/FecContainer.tmp >> $output_dir/FecContainer.tmp)
@@ -169,7 +169,7 @@ while getopts ":f:n:v:d:"  opt; do
                         exit 1;
                     fi
                     #LEFECS=$LEFECS$(printf $i | grep -o .. | tail -r | echo "$(tr -d '\n')")
-					LEFECS=$LEFECS$(printf $i | echo "$(tr -d '\n')" | cut -c7-8)$(printf $i | echo "$(tr -d '\n')" | cut -c5-6)$(printf $i | echo "$(tr -d '\n')" | cut -c3-4)$(printf $i | echo "$(tr -d '\n')" | cut -c1-2)
+		    LEFECS=$LEFECS$(printf $i | echo "$(tr -d '\n')" | cut -c7-8)$(printf $i | echo "$(tr -d '\n')" | cut -c5-6)$(printf $i | echo "$(tr -d '\n')" | cut -c3-4)$(printf $i | echo "$(tr -d '\n')" | cut -c1-2)
                     FEC_COUNT=$((FEC_COUNT+1));
                 done
                 echo "Generating feature codes: $FECS_CSV. FEC count: $FEC_COUNT";
@@ -256,7 +256,6 @@ build_fec_container;
 
 echo "================================================================================================";
 echo "Success! Your FEC files are located in $output_dir.";
-echo "Remember to also copy your public keys to the appropriate location in efs-persist.";
 echo "================================================================================================";
 rm -rf vcrn.tmp && rm -rf $output_dir/fecwap.tmp && rm -rf $output_dir/fecwapped.tmp && rm -rf $output_dir/FecContainer.tmp
 
